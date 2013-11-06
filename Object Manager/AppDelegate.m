@@ -13,6 +13,9 @@
 #import <mach/mach_vm.h>
 #include <Security/Authorization.h>
 
+// STATIC ADDRESSES
+#define ADDRESS_PLAYER_NAME         0x18E1670 // 12 BYTES
+
 // OBJECT MANAGER BASEADDRESS
 #define objMgrPointer               0x16D594C
 #define firstObject                 0xCC
@@ -51,47 +54,51 @@
 {
     // Insert code here to initialize your application
     
-    // ADD DATA TO TABLE VIEW
-    [objectArrayWindowController addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                            @"no data yet", @"guid",
-                                            @"no data yet", @"objectType",
-                                            @"no data yet", @"distance",
-                                            nil]];
+    // REFRESH THE PROCESS LIST POPUP LIST WHEN THE OBJECT MANAGER LOADS
+    [self refreshProcessList:nil];
 }
 
 #pragma mark - Object Manager
 
-- (IBAction)attachMemory:(id)sender {
-    // GET PID FROM TEXTFIELD
-    _selectedPID = [wauwPID intValue];
-    // PRINT TO LOG
-    [statusMessage setStringValue:[NSString stringWithFormat:@"Selected PID: %i",_selectedPID]];
-    NSLog(@"PID: %i",_selectedPID);
+- (IBAction)refreshProcessList:(id)sender {
+    // CLEAR POPUP LIST
+    [popupProcessList removeAllItems];
     
-    // MEMORY ACCESS
-//    kern_return_t kern_return;
-//    mach_port_t task;
-    kern_return = task_for_pid(mach_task_self(), _selectedPID, &task);
+    // FIND WOW INSTANCES
+    for (NSRunningApplication *app in [NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.blizzard.worldofwarcraft"]) {
+        // GET PID
+        pid_t pid = [app processIdentifier];
+        
+        kern_return = task_for_pid(mach_task_self(), pid, &task);
+        // FAILED
+        if (kern_return!=KERN_SUCCESS)
+        {
+            [statusMessage setStringValue:@"Permission Failure."];
+            NSLog(@"Permission Failure, kern_return: %d",kern_return);
+            // RETURN IF FAIL
+            return;
+        }
+        
+        // READ PLAYER NAME FROM MEMORY
+        char str[256];
+        str[255] = 0;
+        mach_vm_read_overwrite(task, ADDRESS_PLAYER_NAME, 12, (Byte*)&str, &outsize);
+        NSString *playerName = [NSString stringWithUTF8String: str];
 
-    // FAILED
-    if (kern_return!=KERN_SUCCESS)
-    {
-        [statusMessage setStringValue:@"Permission Failure."];
-        NSLog(@"Permission Failure, kern_return: %d",kern_return);
-        // RETURN IF FAIL
-        return;
+        // ADD WOW INSTANCE TO POPUP LIST
+        [popupProcessList addItemWithTitle:[NSString stringWithFormat:@"PID: %d (%@)", pid, playerName]];
+        [[popupProcessList lastItem] setTag:pid];
+        
+        // WRITE TO LOG
+        NSLog(@"PID: %d (%@)", pid, playerName);
     }
-    // SUCCESS
-    if (kern_return==KERN_SUCCESS) {
-        [statusMessage setStringValue:@"Success, we have access."];
-        NSLog(@"Success, we have access.");
-    }
-    
 }
 
+
 - (IBAction)refreshData:(id)sender {
-    // GET PID FROM TEXTFIELD
-    _selectedPID = [wauwPID intValue];
+    // GET SELECTED PID FROM POPUP LIST
+    _selectedPID = (pid_t)[[popupProcessList itemAtIndex:[popupProcessList indexOfSelectedItem]] tag];
+    
     // PRINT TO LOG
     [statusMessage setStringValue:[NSString stringWithFormat:@"Selected PID: %i",_selectedPID]];
     NSLog(@"PID: %i",_selectedPID);
@@ -132,12 +139,13 @@
     uint32_t value32 = 0;
     unsigned long long offset;
     // READ HEX ADDRESS FROM TEXTFIELD, CONVERT STRING TO HEX
-    NSScanner *scanner = [NSScanner scannerWithString:[wauwOffset stringValue]];
+    NSString *hexstring = @"10102020";
+    NSScanner *scanner = [NSScanner scannerWithString:hexstring];
     [scanner scanHexLongLong:&offset];
     // READ THE VALUE AT THE USER-SPECIFIED MEMORY ADDRESS
     kern_return = mach_vm_read_overwrite(task, offset, 4, (mach_vm_address_t)&value32, &outsize);
     // PRINT TO LOG
-    NSLog(@"Value at address %@: %i",[wauwOffset stringValue], value32);
+    NSLog(@"Value at address %@: %i",hexstring, value32);
     // TESTING ENDS
     
     ///////////////////////////////////////////////////

@@ -16,22 +16,21 @@
     mach_port_t task;
     mach_vm_size_t outsize;
 
-    IBOutlet NSTextField *wauwPID;
-    IBOutlet NSTextField *wauwOffset;
     IBOutlet NSTextField *statusMessage;
     IBOutlet NSArrayController *objectArrayWindowController;
+    IBOutlet NSPopUpButton *popupProcessList;
     
     IBOutlet NSButton *filterNPCs;
     IBOutlet NSButton *filterPlayers;
     IBOutlet NSButton *filterNodes;
 }
 
-- (IBAction)attachMemory:(id)sender;
+- (IBAction)refreshProcessList:(id)sender;
 - (IBAction)refreshData:(id)sender;
 
 
 
-
+// AUTO-GENERATED
 @property (assign) IBOutlet NSWindow *window;
 
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;

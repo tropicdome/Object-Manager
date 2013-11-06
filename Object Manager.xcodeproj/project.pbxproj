@@ -25,6 +25,7 @@
 		42895BE018266FBB00E96D24 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42895BAA182663EC00E96D24 /* CoreData.framework */; };
 		42895BE118266FC300E96D24 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42895BAB182663EC00E96D24 /* Foundation.framework */; };
 		42895BE31826700900E96D24 /* SecurityFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42895BE21826700900E96D24 /* SecurityFoundation.framework */; };
+		42C7A8CD182A37FD004FE703 /* Offsets.m in Sources */ = {isa = PBXBuildFile; fileRef = 42C7A8CC182A37FD004FE703 /* Offsets.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -61,6 +62,8 @@
 		42895BD3182663EC00E96D24 /* Object_ManagerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Object_ManagerTests.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		42895BDD18266DFB00E96D24 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		42895BE21826700900E96D24 /* SecurityFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityFoundation.framework; path = System/Library/Frameworks/SecurityFoundation.framework; sourceTree = SDKROOT; };
+		42C7A8CB182A37FD004FE703 /* Offsets.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Offsets.h; sourceTree = "<group>"; };
+		42C7A8CC182A37FD004FE703 /* Offsets.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Offsets.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,6 +138,8 @@
 			children = (
 				42895BB8182663EC00E96D24 /* AppDelegate.h */,
 				42895BB9182663EC00E96D24 /* AppDelegate.m */,
+				42C7A8CB182A37FD004FE703 /* Offsets.h */,
+				42C7A8CC182A37FD004FE703 /* Offsets.m */,
 				42895BBB182663EC00E96D24 /* MainMenu.xib */,
 				42895BAD182663EC00E96D24 /* Supporting Files */,
 			);
@@ -275,6 +280,7 @@
 			files = (
 				42895BBA182663EC00E96D24 /* AppDelegate.m in Sources */,
 				42895BB3182663EC00E96D24 /* main.m in Sources */,
+				42C7A8CD182A37FD004FE703 /* Offsets.m in Sources */,
 				42895BC0182663EC00E96D24 /* Object_Manager.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
