@@ -32,7 +32,11 @@
 #define objectNodePositionZOffset   objectNodePositionYOffset+4
 
 // WoWUnit
-#define WoWUnitLevelOffset          0x0
+// 0x1588
+#define WoWNPCLevelOffset           0x1588
+
+#define WoWPlayerLevelOffset        0x3CD4
+
 #define WoWUnitCurrentHealthOffset  0x0
 #define WoWUnitMaxHealthOffset      0x0
 #define WoWUnitCurrentManaOffset    0x0
@@ -171,6 +175,7 @@
     float objectPositionXValue;
     float objectPositionYValue;
     float objectPositionZValue;
+    int unitLevelValue;
 
 
     for (int i=1; i < 1000; i++) {
@@ -194,28 +199,42 @@
             mach_vm_read_overwrite(task, firstObjectBaseAddress+objectPositionXOffset, 4, (mach_vm_address_t)&objectPositionXValue, &outsize);
             mach_vm_read_overwrite(task, firstObjectBaseAddress+objectPositionYOffset, 4, (mach_vm_address_t)&objectPositionYValue, &outsize);
             mach_vm_read_overwrite(task, firstObjectBaseAddress+objectPositionZOffset, 4, (mach_vm_address_t)&objectPositionZValue, &outsize);
+            mach_vm_read_overwrite(task, firstObjectBaseAddress+WoWNPCLevelOffset, 4, (mach_vm_address_t)&unitLevelValue, &outsize);
+
             // ADD OBJECT TO TABLE VIEW
             [objectArrayWindowController addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:
                                                     
                                                     [NSString stringWithFormat:@"0x%02lx", (long int) objectGUIDValue], @"guid",
                                                     [NSString stringWithFormat:@"%i",objectTypeValue],                  @"objectType",
+                                                    [NSString stringWithFormat:@"%i",unitLevelValue],                   @"level",
                                                     @"no data yet",                                                     @"distance",
                                                     nil]];
+
+            // WRITE TO LOG
+            NSLog(@"Object memory address: 0x%x",firstObjectBaseAddress);
+            NSLog(@"Object GUID: 0x%02lx", (long int) objectGUIDValue);
         }
         
         // PARSE (4) PLAYER DATA
         if (objectTypeValue == 4 && [filterPlayers state] == NSOnState) {
             // READ MEMORY
+            
             mach_vm_read_overwrite(task, firstObjectBaseAddress+objectPositionXOffset, 4, (mach_vm_address_t)&objectPositionXValue, &outsize);
             mach_vm_read_overwrite(task, firstObjectBaseAddress+objectPositionYOffset, 4, (mach_vm_address_t)&objectPositionYValue, &outsize);
             mach_vm_read_overwrite(task, firstObjectBaseAddress+objectPositionZOffset, 4, (mach_vm_address_t)&objectPositionZValue, &outsize);
+            mach_vm_read_overwrite(task, firstObjectBaseAddress+WoWPlayerLevelOffset, 4, (mach_vm_address_t)&unitLevelValue, &outsize);
+            
             // ADD OBJECT TO TABLE VIEW
             [objectArrayWindowController addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:
                                                     
                                                     [NSString stringWithFormat:@"0x%02lx", (long int) objectGUIDValue], @"guid",
                                                     [NSString stringWithFormat:@"%i",objectTypeValue],                  @"objectType",
+                                                    [NSString stringWithFormat:@"%i",unitLevelValue],                   @"level",
                                                     @"no data yet",                                                     @"distance",
                                                     nil]];
+            // WRITE TO LOG
+            NSLog(@"Object memory address: 0x%x",firstObjectBaseAddress);
+            NSLog(@"Object GUID: 0x%02lx", (long int) objectGUIDValue);
         }
 
         // PARSE (5) GAMEOBJECT (NODE) DATA

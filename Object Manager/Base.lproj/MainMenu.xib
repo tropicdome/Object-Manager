@@ -701,7 +701,7 @@
                                                 <binding destination="hRO-YW-6AE" name="value" keyPath="arrangedObjects.objectType" id="EEf-k4-A11"/>
                                             </connections>
                                         </tableColumn>
-                                        <tableColumn width="75" minWidth="10" maxWidth="3.4028234663852886e+38" id="24v-zy-vBA">
+                                        <tableColumn width="52" minWidth="10" maxWidth="3.4028234663852886e+38" id="24v-zy-vBA">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Level">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -717,7 +717,7 @@
                                                 <binding destination="hRO-YW-6AE" name="value" keyPath="arrangedObjects.level" id="ce3-BG-1Hj"/>
                                             </connections>
                                         </tableColumn>
-                                        <tableColumn width="130" minWidth="40" maxWidth="1000" id="HjI-e2-xtN">
+                                        <tableColumn width="153" minWidth="40" maxWidth="1000" id="HjI-e2-xtN">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="center" title="Distance">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
