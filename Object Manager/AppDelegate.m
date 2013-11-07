@@ -32,10 +32,11 @@
 #define objectNodePositionZOffset   objectNodePositionYOffset+4
 
 // WoWUnit
-// 0x1588
 #define WoWNPCLevelOffset           0x1588
-
 #define WoWPlayerLevelOffset        0x3CD4
+
+#define WoWUnitNameBaseOffset       0x9A0          // *(UnitBaseAddress + 0x9A0) + D8
+#define WoWUnitNamePointerOffset    0xD8
 
 #define WoWUnitCurrentHealthOffset  0x0
 #define WoWUnitMaxHealthOffset      0x0
@@ -83,7 +84,7 @@
             return;
         }
         
-        // READ PLAYER NAME FROM MEMORY
+        // READ PLAYER NAME FROM MEMORY (READ STRING)
         char str[256];
         str[255] = 0;
         mach_vm_read_overwrite(task, ADDRESS_PLAYER_NAME, 12, (Byte*)&str, &outsize);
@@ -177,8 +178,10 @@
     float objectPositionZValue;
     int unitLevelValue;
 
+    int unitNamePointer;
+    NSString *unitNameValue;
 
-    for (int i=1; i < 1000; i++) {
+    for (int i=1; i < 500; i++) {
         // READ MEMORY
         mach_vm_read_overwrite(task, firstObjectBaseAddress+objectTypeOffset,      4, (mach_vm_address_t)&objectTypeValue, &outsize);
         mach_vm_read_overwrite(task, firstObjectBaseAddress+objecGUIDOffset,       8, (mach_vm_address_t)&objectGUIDValue, &outsize);
@@ -196,16 +199,31 @@
         // PARSE (3) NPC DATA
         if (objectTypeValue == 3 && [filterNPCs state] == NSOnState) {
             // READ MEMORY
+            // *(UnitBaseAddress + 0x9A0) + D8
+            // 0x54757db4 + 0x9A0
+            // 0x54758754 + D8
+            // 0x28
+            // 0x100
             mach_vm_read_overwrite(task, firstObjectBaseAddress+objectPositionXOffset, 4, (mach_vm_address_t)&objectPositionXValue, &outsize);
             mach_vm_read_overwrite(task, firstObjectBaseAddress+objectPositionYOffset, 4, (mach_vm_address_t)&objectPositionYValue, &outsize);
             mach_vm_read_overwrite(task, firstObjectBaseAddress+objectPositionZOffset, 4, (mach_vm_address_t)&objectPositionZValue, &outsize);
             mach_vm_read_overwrite(task, firstObjectBaseAddress+WoWNPCLevelOffset, 4, (mach_vm_address_t)&unitLevelValue, &outsize);
 
+            
+            // READ UNIT NAME FROM MEMORY (READ STRING)
+            mach_vm_read_overwrite(task, firstObjectBaseAddress+WoWUnitNameBaseOffset, 4, (mach_vm_address_t)&unitNamePointer, &outsize);
+
+            char str[256];
+            str[255] = 0;
+            mach_vm_read_overwrite(task, unitNamePointer+WoWUnitNamePointerOffset, 30, (Byte*)&str, &outsize); // IF IT RETURNS NULL WE NEED TO READ MORE BYTES
+            unitNameValue = [NSString stringWithUTF8String: str];
+            
             // ADD OBJECT TO TABLE VIEW
             [objectArrayWindowController addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:
                                                     
                                                     [NSString stringWithFormat:@"0x%02lx", (long int) objectGUIDValue], @"guid",
-                                                    [NSString stringWithFormat:@"%i",objectTypeValue],                  @"objectType",
+//                                                    [NSString stringWithFormat:@"%i",objectTypeValue],                  @"objectType",
+                                                    unitNameValue,                                                      @"name",
                                                     [NSString stringWithFormat:@"%i",unitLevelValue],                   @"level",
                                                     @"no data yet",                                                     @"distance",
                                                     nil]];
@@ -213,6 +231,7 @@
             // WRITE TO LOG
             NSLog(@"Object memory address: 0x%x",firstObjectBaseAddress);
             NSLog(@"Object GUID: 0x%02lx", (long int) objectGUIDValue);
+            NSLog(@"Unit name: %@", unitNameValue);
         }
         
         // PARSE (4) PLAYER DATA
@@ -228,7 +247,7 @@
             [objectArrayWindowController addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:
                                                     
                                                     [NSString stringWithFormat:@"0x%02lx", (long int) objectGUIDValue], @"guid",
-                                                    [NSString stringWithFormat:@"%i",objectTypeValue],                  @"objectType",
+//                                                    [NSString stringWithFormat:@"%i",objectTypeValue],                  @"objectType",
                                                     [NSString stringWithFormat:@"%i",unitLevelValue],                   @"level",
                                                     @"no data yet",                                                     @"distance",
                                                     nil]];
@@ -250,6 +269,9 @@
                                                     [NSString stringWithFormat:@"%i",objectTypeValue],                  @"objectType",
                                                     @"no data yet",                                                     @"distance",
                                                     nil]];
+            // WRITE TO LOG
+            NSLog(@"Object memory address: 0x%x",firstObjectBaseAddress);
+            NSLog(@"Object GUID: 0x%02lx", (long int) objectGUIDValue);
         }
         
         // GET POINTER FOR NEXT OBJECT
