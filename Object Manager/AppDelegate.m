@@ -31,6 +31,10 @@
 #define objectNodePositionYOffset   objectNodePositionXOffset+4
 #define objectNodePositionZOffset   objectNodePositionYOffset+4
 
+#define objectNodeNameBaseOffset    0x1AC          // *(*(ObjectBaseAddress + 0x1AC) + 0xB0)
+#define objectNodeNamePointerOffset 0xB0
+
+
 // WoWUnit
 #define WoWNPCLevelOffset           0x1588
 #define WoWPlayerLevelOffset        0x3CD4
@@ -181,6 +185,9 @@
     int unitNamePointer;
     NSString *unitNameValue;
 
+    int objectNamePointer;
+    NSString *objectNameValue;
+    
     for (int i=1; i < 500; i++) {
         // READ MEMORY
         mach_vm_read_overwrite(task, firstObjectBaseAddress+objectTypeOffset,      4, (mach_vm_address_t)&objectTypeValue, &outsize);
@@ -262,11 +269,22 @@
             mach_vm_read_overwrite(task, firstObjectBaseAddress + objectNodePositionXOffset, 4, (mach_vm_address_t)&objectPositionXValue, &outsize);
             mach_vm_read_overwrite(task, firstObjectBaseAddress + objectNodePositionYOffset, 4, (mach_vm_address_t)&objectPositionYValue, &outsize);
             mach_vm_read_overwrite(task, firstObjectBaseAddress + objectNodePositionZOffset, 4, (mach_vm_address_t)&objectPositionZValue, &outsize);
+
+            // READ OBJECT NAME FROM MEMORY (READ STRING)
+            mach_vm_read_overwrite(task, firstObjectBaseAddress+objectNodeNameBaseOffset, 4, (mach_vm_address_t)&objectNamePointer, &outsize);
+            mach_vm_read_overwrite(task, objectNamePointer+objectNodeNamePointerOffset, 4, (mach_vm_address_t)&objectNamePointer, &outsize);
+            
+            char str[256];
+            str[255] = 0;
+            mach_vm_read_overwrite(task, objectNamePointer, 30, (Byte*)&str, &outsize); // IF IT RETURNS NULL WE NEED TO READ MORE BYTES
+            objectNameValue = [NSString stringWithUTF8String: str];
+
             // ADD OBJECT TO TABLE VIEW
             [objectArrayWindowController addObject:[NSMutableDictionary dictionaryWithObjectsAndKeys:
                                                     
                                                     [NSString stringWithFormat:@"0x%02lx", objectGUIDValue],            @"guid",
-                                                    [NSString stringWithFormat:@"%i",objectTypeValue],                  @"objectType",
+//                                                    [NSString stringWithFormat:@"%i",objectTypeValue],                  @"objectType",
+                                                    objectNameValue,                                                    @"name",
                                                     @"no data yet",                                                     @"distance",
                                                     nil]];
             // WRITE TO LOG
